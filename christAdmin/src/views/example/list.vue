@@ -41,11 +41,11 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="Actions" width="120">
+      <el-table-column v-if="checkPermission(['admin'])" align="center" label="Actions" width="120">
         <template slot-scope="scope">
           <router-link :to="'/example/edit/'+scope.row.id">
             <el-button type="primary" size="small" icon="el-icon-edit">
-              Edit
+              Editor
             </el-button>
           </router-link>
         </template>
@@ -57,12 +57,15 @@
 </template>
 
 <script>
+import permission from '@/directive/permission/index.js' // 权限判断指令
+import checkPermission from '@/utils/permission' // 权限判断函数
 import { fetchList } from '@/api/article'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
   name: 'ArticleList',
   components: { Pagination },
+  directives: { permission },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -88,6 +91,7 @@ export default {
     this.getList()
   },
   methods: {
+    checkPermission,
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {

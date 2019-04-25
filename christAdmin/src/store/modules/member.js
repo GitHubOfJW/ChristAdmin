@@ -53,8 +53,6 @@ const actions = {
         if (!data) {
           reject('Verification failed, please Login again.')
         }
-
-        data['roles'] = ['amdin']
         const { roles, name, avatar, introduction } = data
 
         // roles must be a non-empty array

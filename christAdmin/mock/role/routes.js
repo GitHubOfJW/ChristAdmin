@@ -333,7 +333,7 @@ export const asyncRoutes = [
         path: 'edit/:id(\\d+)',
         component: 'views/example/edit',
         name: 'EditArticle',
-        meta: { title: 'editArticle', noCache: true },
+        meta: { title: 'editArticle', noCache: true, roles: ['admin'] },
         hidden: true
       },
       {
