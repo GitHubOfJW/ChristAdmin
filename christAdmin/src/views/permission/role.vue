@@ -7,7 +7,7 @@
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" label="Role Key" width="220">
         <template slot-scope="scope">
-          {{ scope.row.key }}
+          {{ scope.row.role_key }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="Role Name" width="220">
@@ -17,7 +17,7 @@
       </el-table-column>
       <el-table-column align="header-center" label="Description">
         <template slot-scope="scope">
-          {{ scope.row.description }}
+          {{ scope.row.descr }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="Operations">
@@ -39,7 +39,7 @@
         </el-form-item>
         <el-form-item label="Desc">
           <el-input
-            v-model="role.description"
+            v-model="role.descr"
             :autosize="{ minRows: 2, maxRows: 4}"
             type="textarea"
             placeholder="Role Description"
@@ -70,7 +70,7 @@ import i18n from '@/lang'
 const defaultRole = {
   key: '',
   name: '',
-  description: '',
+  descr: '',
   routes: []
 }
 
@@ -187,7 +187,7 @@ export default {
         type: 'warning'
       })
         .then(async() => {
-          await deleteRole(row.key)
+          await deleteRole(row.role_key)
           this.rolesList.splice($index, 1)
           this.$message({
             type: 'success',
@@ -220,16 +220,16 @@ export default {
       this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
 
       if (isEdit) {
-        await updateRole(this.role.key, this.role)
+        await updateRole(this.role.role_key, this.role)
         for (let index = 0; index < this.rolesList.length; index++) {
-          if (this.rolesList[index].key === this.role.key) {
+          if (this.rolesList[index].role_key === this.role.role_key) {
             this.rolesList.splice(index, 1, Object.assign({}, this.role))
             break
           }
         }
       } else {
         const { data } = await addRole(this.role)
-        this.role.key = data.key
+        this.role.role_key = data.role_key
         this.rolesList.push(this.role)
       }
 

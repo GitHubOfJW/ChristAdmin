@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.mobile" :placeholder="$t('table.mobile')" style="width: 120px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.name" :placeholder="$t('table.name')" style="width: 120px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.wechat" :placeholder="$t('table.wechat')" style="width: 120px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.qq" :placeholder="$t('table.qq')" style="width: 120px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.mobile" clearable :placeholder="$t('table.mobile')" style="width: 120px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.name" clearable :placeholder="$t('table.name')" style="width: 120px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.wechat" clearable :placeholder="$t('table.wechat')" style="width: 120px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.qq" clearable :placeholder="$t('table.qq')" style="width: 120px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-select v-model="listQuery.gender" :placeholder="$t('table.gender')" clearable class="filter-item" style="width: 130px">
         <el-option v-for="item in genderOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>

@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.name" :placeholder="$t('table.name')" style="width: 120px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.path" :placeholder="$t('table.path')" style="width: 120px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.parent_id" :placeholder="$t('table.gender')" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in parentOptions" :key="item.id" :label="item.name" :value="item.id" />
+      <el-input v-model="listQuery.name" :placeholder="$t('table.name')" clearable style="width: 150px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.path" :placeholder="$t('table.path')" clearable style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-select v-model="listQuery.parent_id" :placeholder="$t('table.cate')" class="filter-item" style="width: 150px">
+        <el-option v-for="item in parentOptions" :key="item.id" :label="item.label || item.name" :value="item.id" />
       </el-select>
       <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
@@ -20,6 +20,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
+      :row-class-name="tableRowClassName"
       border
       fit
       highlight-current-row
@@ -41,31 +42,16 @@
           <span>{{ (scope.row.path || '') }}</span>
         </template>
       </el-table-column>
-      <!-- <el-table-column :label="$t('table.cate')" width="150px" align="center">
+      <el-table-column :label="$t('table.cate')" width="150px" align="center">
         <template slot-scope="scope">
-          <span>{{ (scope.row.father.name || '未知') }}</span>
+          <span>{{ scope.row.parent_id == 0 ? '根分类' : scope.row.father.name }}</span>
         </template>
-      </el-table-column> -->
+      </el-table-column>
       <el-table-column :label="$t('table.desc')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.desc }}</span>
+          <span>{{ scope.row.descr }}</span>
         </template>
       </el-table-column>
-      <!-- <el-table-column :label="$t('table.wechat')" width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ (scope.row.wechat || '未填写') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('table.qq')" width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ (scope.row.qq || '未填写') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('table.token')" width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.token }}</span>
-        </template>
-      </el-table-column> -->
       <el-table-column fixed="right" :label="$t('table.actions')" align="center" width="160" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
@@ -88,7 +74,7 @@
         <el-form-item v-if="temp.parent_id!=0" :label="$t('table.path')" prop="path">
           <el-input v-model="temp.path" placeholder="Please input" />
         </el-form-item>
-        <el-form-item :label="$t('table.cate')" prop="parent_id">
+        <el-form-item v-if="dialogStatus ==='create' || (temp.sort !== temp.id)" :label="$t('table.cate')" prop="parent_id">
           <el-select v-model="temp.parent_id" class="filter-item" placeholder="Please select" @change="handlerCate()">
             <el-option v-for="item in parentOptions" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
@@ -132,11 +118,11 @@ export default {
         name: undefined,
         path: undefined,
         descr: undefined,
-        parent_id: '0',
-        sort: '+id'
+        parent_id: 0,
+        sort: '+sort'
       },
-      sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
-      parentOptions: [{ id: 0, name: '根分类', parent_id: 0 }],
+      sortOptions: [{ label: 'ID Ascending', key: '+sort' }, { label: 'ID Descending', key: '-sort' }],
+      parentOptions: [{ id: 0, name: '根分类', parent_id: 0, label: '全部分类' }],
       temp: {
         id: undefined,
         name: '',
@@ -145,7 +131,7 @@ export default {
         parent_id: 0
       },
       dialogFormVisible: false,
-      dialogStatus: '',
+      dialogStatus: 'create',
       textMap: {
         update: 'Edit',
         create: 'Create'
@@ -172,19 +158,25 @@ export default {
         }
       })
     },
-    getList() {
-      this.listLoading = true
+    getList(loading = true) {
+      this.listLoading = loading
       fetchList(this.listQuery).then(response => {
         this.list = response.data.items
         this.total = response.data.total
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1 * 1000)
+        if (loading) {
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1 * 1000)
+        }
       })
     },
     handlerCate() {
       // 处理分类
-      this.set('rules.path[0].required', (this.temp.parent_id === '0'))
+      if (this.temp.parent_id === 0) {
+        this.rules.path.splice(0, 1)
+      } else {
+        this.rules.path.splice(0, 1, { required: true, message: 'path is required', trigger: 'change' })
+      }
     },
     handleFilter() {
       this.listQuery.page = 1
@@ -205,9 +197,9 @@ export default {
     },
     sortByID(order) {
       if (order === 'ascending') {
-        this.listQuery.sort = '+id'
+        this.listQuery.sort = '+sort'
       } else {
-        this.listQuery.sort = '-id'
+        this.listQuery.sort = '-sort'
       }
       this.handleFilter()
     },
@@ -235,10 +227,12 @@ export default {
           this.temp.author = 'vue-element-admin'
           createRule(this.temp).then((response) => {
             this.temp.id = response.data.id
-            this.list.unshift(this.temp)
             if (this.temp.parent_id === 0) {
-              this.parentOptions.push({ id: this.temp.id, name: this.temp.name, parent_id: this.temp.parent_id })
+              this.getCateList()
+            } else {
+              this.temp.father = this.parentOptions.find(item => item.id === this.temp.parent_id)
             }
+            this.getList(false)
             this.dialogFormVisible = false
             this.$notify({
               title: '成功',
@@ -268,10 +262,14 @@ export default {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
                 const index = this.list.indexOf(v)
+                if (this.temp.parent_id === 0) {
+                  this.temp.path = ''
+                }
                 this.list.splice(index, 1, this.temp)
                 break
               }
             }
+            this.getCateList()
             this.dialogFormVisible = false
             this.$notify({
               title: '成功',
@@ -292,7 +290,22 @@ export default {
       })
       const index = this.list.indexOf(row)
       this.list.splice(index, 1)
+    },
+    tableRowClassName({ row }, rowIndex) {
+      if (row.parent_id === 0) {
+        return 'success-row'
+      }
+      return ''
     }
   }
 }
 </script>
+<style lang="scss">
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
+</style>
