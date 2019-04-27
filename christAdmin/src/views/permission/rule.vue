@@ -163,6 +163,9 @@ export default {
       fetchList(this.listQuery).then(response => {
         this.list = response.data.items
         this.total = response.data.total
+        if (this.list.length <= 0) {
+          this.getCateList()
+        }
         if (loading) {
           setTimeout(() => {
             this.listLoading = false
@@ -259,17 +262,18 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           updateRule(tempData).then(() => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                if (this.temp.parent_id === 0) {
-                  this.temp.path = ''
-                }
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
+            // for (const v of this.list) {
+            //   if (v.id === this.temp.id) {
+            //     const index = this.list.indexOf(v)
+            //     if (this.temp.parent_id === 0) {
+            //       this.temp.path = ''
+            //     }
+            //     this.list.splice(index, 1, this.temp)
+            //     break
+            //   }
+            // }
             this.getCateList()
+            this.getList()
             this.dialogFormVisible = false
             this.$notify({
               title: '成功',

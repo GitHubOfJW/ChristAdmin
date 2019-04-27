@@ -26,7 +26,7 @@ export function fetchList(query = {}) {
 
 export function createMember(data) {
   return request({
-    url: '/member/create',
+    url: '/member/add',
     method: 'post',
     data
   })
@@ -34,7 +34,7 @@ export function createMember(data) {
 
 export function updateMember(data) {
   return request({
-    url: '/member/update',
+    url: `/member/edit/${data.id}`,
     method: 'put',
     data
   })

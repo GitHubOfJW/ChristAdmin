@@ -119,6 +119,7 @@ export default {
     birth: 'Birth',
     wechat: 'Wechat',
     qq: 'QQ',
+    key: 'Key',
     name: 'Name',
     path: 'Path',
     desc: 'Desc',

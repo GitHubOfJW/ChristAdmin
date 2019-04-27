@@ -119,6 +119,7 @@ export default {
     birth: '生日',
     wechat: '微信',
     qq: 'QQ',
+    key: '关键字',
     name: '名称',
     path: '路径',
     desc: '描述',

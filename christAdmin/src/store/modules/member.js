@@ -53,18 +53,11 @@ const actions = {
         if (!data) {
           reject('Verification failed, please Login again.')
         }
-        const { roles, name, avatar, introduction } = data
-
-        // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
-          // reject('getInfo: roles must be a non-null array!')
-
-        }
-
-        commit('SET_ROLES', roles)
+        const { role, name, avatar, descr } = data
+        commit('SET_ROLES', [role.role_key])
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)
-        commit('SET_INTRODUCTION', introduction)
+        commit('SET_INTRODUCTION', descr)
         resolve(data)
       }).catch(error => {
         reject(error)

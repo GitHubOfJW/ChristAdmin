@@ -3,24 +3,31 @@
     <el-button type="primary" @click="handleAddRole">
       {{ $t('permission.addRole') }}
     </el-button>
-
+    <el-button style="float:right;" type="primary" @click="getRoles()">
+      <i class="el-icon-refresh" /> 刷新
+    </el-button>
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
-      <el-table-column align="center" label="Role Key" width="220">
+      <el-table-column align="center" :label="$t('table.id')" width="220">
+        <template slot-scope="scope">
+          <span>{{ scope.row.id }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" :label="$t('table.key')" width="220">
         <template slot-scope="scope">
           {{ scope.row.role_key }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Role Name" width="220">
+      <el-table-column align="center" :label="$t('table.name')" width="220">
         <template slot-scope="scope">
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="Description">
+      <el-table-column align="center" :label="$t('table.desc')">
         <template slot-scope="scope">
           {{ scope.row.descr }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Operations">
+      <el-table-column align="center" :label="$t('table.actions')">
         <template slot-scope="scope">
           <el-button type="primary" size="small" @click="handleEdit(scope)">
             {{ $t('permission.editPermission') }}
@@ -106,9 +113,10 @@ export default {
       const routes = this.generateRoutes(res.data)
       this.routes = this.i18n(routes)
     },
-    async getRoles() {
-      const res = await getRoles()
-      this.rolesList = res.data
+    getRoles() {
+      getRoles().then(res => {
+        this.rolesList = res.data.items
+      })
     },
     i18n(routes) {
       const app = routes.map(route => {
@@ -220,7 +228,7 @@ export default {
       this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
 
       if (isEdit) {
-        await updateRole(this.role.role_key, this.role)
+        await updateRole(this.role, this.role)
         for (let index = 0; index < this.rolesList.length; index++) {
           if (this.rolesList[index].role_key === this.role.role_key) {
             this.rolesList.splice(index, 1, Object.assign({}, this.role))
@@ -230,18 +238,19 @@ export default {
       } else {
         const { data } = await addRole(this.role)
         this.role.role_key = data.role_key
+        this.role.id = data.id
         this.rolesList.push(this.role)
       }
 
-      const { description, key, name } = this.role
+      const { descr, role_key, name } = this.role
       this.dialogVisible = false
       this.$notify({
         title: 'Success',
         dangerouslyUseHTMLString: true,
         message: `
-            <div>Role Key: ${key}</div>
-            <div>Role Nmae: ${name}</div>
-            <div>Description: ${description}</div>
+            <div>${this.$t('table.key')}: ${role_key}</div>
+            <div>${this.$t('table.name')}: ${name}</div>
+            <div>${this.$t('table.desc')}: ${descr}</div>
           `,
         type: 'success'
       })

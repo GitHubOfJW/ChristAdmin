@@ -18,7 +18,7 @@ export function fetchList(query = {}) {
 
 export function createRule(data) {
   return request({
-    url: '/rule/create',
+    url: '/rule/add',
     method: 'post',
     data
   })
@@ -26,7 +26,7 @@ export function createRule(data) {
 
 export function updateRule(data) {
   return request({
-    url: '/rule/update',
+    url: `/rule/edit/${data.id}`,
     method: 'put',
     data
   })
