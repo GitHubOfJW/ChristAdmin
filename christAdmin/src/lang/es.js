@@ -7,6 +7,8 @@ export default {
     rolePermission: 'Permisos de rol',
     members: 'Member list',
     rules: 'Auth list',
+    album: 'Album',
+    music: 'Music',
     pagePermission: 'Permisos de la página',
     directivePermission: 'Permisos de la directiva',
     icons: 'Iconos',

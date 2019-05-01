@@ -6,6 +6,8 @@ export default {
     permission: 'Permission',
     members: 'Members',
     rules: 'Auths',
+    album: 'Album',
+    music: 'Music',
     pagePermission: 'Page Permission',
     rolePermission: 'Role Permission',
     directivePermission: 'Directive Permission',

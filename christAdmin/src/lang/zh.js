@@ -7,6 +7,8 @@ export default {
     rolePermission: '角色权限',
     members: '管理员列表',
     rules: '规则权限',
+    album: '专辑',
+    music: '音乐',
     pagePermission: '页面权限',
     directivePermission: '指令权限',
     icons: '图标',

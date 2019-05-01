@@ -35,13 +35,6 @@ router.beforeEach(async(to, from, next) => {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
           const { role, is_admin } = await store.dispatch('member/getInfo')
-          // if (!role) {
-          //   const routes = await getRoutes()
-          //   role = {
-          //     routes: routes,
-          //     role_key: 'admin'
-          //   }
-          // }
           // generate accessible routes map based on roles
           if (is_admin) {
             role.role_key = 'admin'
@@ -49,7 +42,6 @@ router.beforeEach(async(to, from, next) => {
           const accessRoutes = await store.dispatch('permission/generateRoutes', role)
           // dynamically add accessible routes
           router.addRoutes(accessRoutes)
-          console.log('测试1', accessRoutes)
 
           // hack method to ensure that addRoutes is complete
           // set the replace: true, so the navigation will not leave a history record
