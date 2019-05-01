@@ -127,6 +127,7 @@ export default {
     token: 'Token',
     match: '模糊匹配',
     importance: '重要性',
+    role: '角色',
     type: '类型',
     remark: '点评',
     search: '搜索',

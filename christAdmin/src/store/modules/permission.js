@@ -1,31 +1,19 @@
 import { asyncRoutes, constantRoutes } from '@/router'
 
 /**
- * Use meta.role to determine if the current user has permission
- * @param roles
- * @param route
- */
-function hasPermission(roles, route) {
-  if (route.meta && route.meta.roles) {
-    return roles.some(role => route.meta.roles.includes(role))
-  } else {
-    return true
-  }
-}
-
-/**
  * Filter asynchronous routing tables by recursion
  * @param routes asyncRoutes
  * @param roles
  */
-export function filterAsyncRoutes(routes, roles) {
+export function filterAsyncRoutes(routes, routesStr) {
   const res = []
 
   routes.forEach(route => {
     const tmp = { ...route }
-    if (hasPermission(roles, tmp)) {
+    console.log(routesStr, tmp.path)
+    if (routesStr.indexOf(`"path":"${tmp.path}"`) > 0) {
       if (tmp.children) {
-        tmp.children = filterAsyncRoutes(tmp.children, roles)
+        tmp.children = filterAsyncRoutes(tmp.children, routesStr)
       }
       res.push(tmp)
     }
@@ -53,8 +41,8 @@ const actions = {
       if (role.role_key === 'admin') {
         accessedRoutes = asyncRoutes || []
       } else {
-        // accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
-        accessedRoutes = role.routes
+        accessedRoutes = filterAsyncRoutes(asyncRoutes, JSON.stringify(role.routes).replace(' ', ''))
+        console.log('看看路由', accessedRoutes)
       }
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)

@@ -127,6 +127,7 @@ export default {
     token: 'Token',
     match: 'Match',
     importance: 'Imp',
+    role: 'Role',
     type: 'Type',
     remark: 'Remark',
     search: 'Search',

@@ -104,6 +104,9 @@
         <el-form-item :label="$t('table.qq')" prop="qq">
           <el-input v-model="temp.qq" />
         </el-form-item>
+        <el-form-item v-if="!temp.is_admin" :label="$t('table.role')" prop="role_id">
+          <el-radio v-for="role in rolesData" :key="role.id" v-model="temp.role_id" :value="role.id" :label="role.id">{{ role.name }}</el-radio>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -119,6 +122,7 @@
 
 <script>
 import { fetchList, createMember, updateMember } from '@/api/member'
+import { fetchRoles } from '@/api/role'
 // eslint-disable-next-line
 import { parseTime } from '@/utils'
 import waves from '@/directive/waves' // waves directive
@@ -144,6 +148,12 @@ export default {
         sort: '+id',
         gender: '-1'
       },
+      checkStrictly: false,
+      rolesData: [],
+      defaultProps: {
+        label: 'name',
+        children: 'children'
+      },
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       genderOptions: [{ label: '不限', key: '-1' }, { label: '男', key: '1' }, { label: '女', key: '0' }],
       temp: {
@@ -153,7 +163,8 @@ export default {
         gender: '-1',
         birth: new Date(),
         wechat: '',
-        qq: ''
+        qq: '',
+        is_admin: false
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -164,14 +175,21 @@ export default {
       rules: {
         mobile: [{ required: true, message: 'mobile is required', trigger: 'change' }],
         name: [{ required: true, message: 'name is required', trigger: 'change' }],
-        gender: [{ required: true, message: 'gender is required', trigger: 'change' }]
+        gender: [{ required: true, message: 'gender is required', trigger: 'change' }],
+        role_id: [{ required: true, message: 'role is required', trigger: 'change' }]
       }
     }
   },
   created() {
     this.getList()
+    this.getRoles()
   },
   methods: {
+    getRoles() {
+      fetchRoles().then(response => {
+        this.rolesData = response.data.items
+      })
+    },
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
@@ -215,7 +233,8 @@ export default {
         gender: '1',
         birth: new Date(),
         wechat: '',
-        qq: ''
+        qq: '',
+        role_id: null
       }
     },
     handleCreate() {

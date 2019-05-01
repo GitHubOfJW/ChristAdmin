@@ -22,6 +22,13 @@ export function addRole(data) {
   })
 }
 
+export function fetchRoles() {
+  return request({
+    url: '/role/roles',
+    method: 'get'
+  })
+}
+
 export function updateRole(data) {
   return request({
     url: `/role/edit/${data.id}`,
