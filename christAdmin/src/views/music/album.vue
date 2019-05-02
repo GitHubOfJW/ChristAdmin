@@ -107,13 +107,7 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20,
-        mobile: undefined,
-        name: undefined,
-        wechat: undefined,
-        qq: undefined,
-        sort: '+id',
-        gender: '-1'
+        limit: 20
       },
       checkStrictly: false,
       rolesData: [],
@@ -211,8 +205,6 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
           createAlbum(this.temp).then((response) => {
             this.temp.id = response.data.id
             this.list.unshift(this.temp)

@@ -8,6 +8,14 @@ export function fetchList(query = {}) {
   })
 }
 
+export function fetchAlbums(query = {}) {
+  return request({
+    url: '/album/albums',
+    method: 'get',
+    params: query
+  })
+}
+
 export function createAlbum(data) {
   return request({
     url: '/album/add',

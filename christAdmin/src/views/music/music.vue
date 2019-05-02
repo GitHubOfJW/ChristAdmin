@@ -28,6 +28,11 @@
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
+      <el-table-column :label="$t('table.author')" width="300px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.author }}</span>
+        </template>
+      </el-table-column>
       <el-table-column align="center" :label="$t('table.desc')">
         <template slot-scope="scope">
           {{ scope.row.descr }}
@@ -57,19 +62,31 @@
         <el-form-item :label="$t('table.name')" prop="name">
           <el-input v-model="temp.name" />
         </el-form-item>
+        <el-form-item :label="$t('table.author')" prop="author">
+          <el-input v-model="temp.author" />
+        </el-form-item>
         <el-form-item :label="$t('table.desc')">
           <el-input
             v-model="temp.descr"
             :autosize="{ minRows: 2, maxRows: 4}"
             type="textarea"
-            placeholder="Ablum Description"
+            placeholder="Description"
           />
         </el-form-item>
         <el-form-item label="Image" prop="big_url">
           <el-input type="hidden" value="temp.big_url" />
-          <el-upload ref="upload" :file-list="fileList" action="/dev-api/upload/image" accept="image/jpg,image/jpeg,image/png" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-success="handleSuccess" :limit="1">
+          <el-upload :file-list="fileList" action="/dev-api/upload/image" accept="image/jpg,image/jpeg,image/png" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-success="handleSuccess" :limit="1">
             <i class="el-icon-plus" />
           </el-upload>
+        </el-form-item>
+        <el-form-item label="Source" prop="source_url">
+          <el-input type="hidden" value="temp.source_url" />
+          <el-upload class="upload-demo" :file-list="sourceList" action="/dev-api/upload/music" accept="audio/mpeg,audio/x-wav" multiple :on-remove="handleRemove" :on-success="handleSourceSuccess" :limit="1">
+            <el-button size="small" type="primary">点击上传</el-button>
+          </el-upload>
+        </el-form-item>
+        <el-form-item :label="$t('table.album')" prop="album_id">
+          <el-radio v-for="role in albumsData" :key="role.id" v-model="temp.role_id" :value="role.id" :label="role.id">{{ role.name }}</el-radio>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -88,8 +105,8 @@
 </template>
 
 <script>
-import { fetchList, createAlbum, updateAlbum } from '@/api/album'
-import { fetchRoles } from '@/api/role'
+import { fetchList, createMusic, updateMusic } from '@/api/music'
+import { fetchAlbums } from '@/api/album'
 // eslint-disable-next-line
 import { parseTime } from '@/utils'
 import waves from '@/directive/waves' // waves directive
@@ -122,6 +139,8 @@ export default {
         children: 'children'
       },
       fileList: [],
+      sourceList: [],
+      albumsData: [],
       dialogImageUrl: '',
       dialogVisible: false,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
@@ -129,8 +148,10 @@ export default {
       temp: {
         id: undefined,
         name: '',
+        author: '',
         descr: '',
-        big_url: ''
+        big_url: '',
+        source_url: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -148,12 +169,11 @@ export default {
   },
   created() {
     this.getList()
-    this.getRoles()
   },
   methods: {
-    getRoles() {
-      fetchRoles().then(response => {
-        this.rolesData = response.data.items
+    getAlbums() {
+      fetchAlbums().then(response => {
+        this.albumsData = response.data.items
       })
     },
     getList() {
@@ -199,9 +219,11 @@ export default {
         big_url: ''
       }
       this.fileList.splice(0, this.fileList.length)
+      this.sourceList.splice(0, this.sourceList.length)
     },
     handleCreate() {
       this.resetTemp()
+      this.getAlbums()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -211,9 +233,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          createAlbum(this.temp).then((response) => {
+          createMusic(this.temp).then((response) => {
             this.temp.id = response.data.id
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
@@ -233,6 +253,10 @@ export default {
         name: row.big_url.substring(row.big_url.lastIndexOf('/') + 1),
         url: row.big_url
       })
+      this.sourceList.splice(0, this.sourceList.length, {
+        name: row.source_url.substring(row.source_url.lastIndexOf('/') + 1),
+        url: row.source_url
+      })
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -243,7 +267,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateAlbum(tempData).then(() => {
+          updateMusic(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
                 const index = this.list.indexOf(v)
@@ -279,6 +303,13 @@ export default {
         url: response.data.url
       })
     },
+    handleSourceSuccess(response, file, fileList) {
+      this.temp.source_url = response.data.url
+      this.sourceList.splice(0, this.sourceList.length, {
+        name: response.data.filename,
+        url: response.data.url
+      })
+    },
     handleRemove(file, fileList) {
       console.log(file, fileList)
     },
@@ -288,6 +319,7 @@ export default {
     },
     handlerClose() {
       this.fileList.splice(0, this.fileList.length)
+      this.sourceList.splice(0, this.fileList.length)
     }
   }
 }

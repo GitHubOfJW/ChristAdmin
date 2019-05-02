@@ -116,6 +116,7 @@ export default {
     dragTips1: 'The default order',
     dragTips2: 'The after dragging order',
     title: 'Title',
+    album: 'Album',
     mobile: 'Mobile',
     gender: 'Gender',
     birth: 'Birth',
