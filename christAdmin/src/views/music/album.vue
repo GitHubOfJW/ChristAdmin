@@ -33,6 +33,11 @@
           {{ scope.row.descr }}
         </template>
       </el-table-column>
+      <el-table-column align="center" :label="$t('table.music_count')">
+        <template slot-scope="scope">
+          {{ scope.row.music_count }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="Image">
         <template slot-scope="scope">
           <img :src="scope.row.big_url" height="50">

@@ -23,6 +23,11 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
+      <el-table-column align="center" :label="$t('table.num')">
+        <template slot-scope="scope">
+          {{ scope.row.num }}
+        </template>
+      </el-table-column>
       <el-table-column :label="$t('table.name')" width="300px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.name }}</span>
@@ -62,6 +67,9 @@
         <el-form-item :label="$t('table.name')" prop="name">
           <el-input v-model="temp.name" />
         </el-form-item>
+        <el-form-item :label="$t('table.num')" prop="num">
+          <el-input v-model="temp.num" type="number" />
+        </el-form-item>
         <el-form-item :label="$t('table.author')" prop="author">
           <el-input v-model="temp.author" />
         </el-form-item>
@@ -86,7 +94,7 @@
           </el-upload>
         </el-form-item>
         <el-form-item :label="$t('table.album')" prop="album_id">
-          <el-radio v-for="role in albumsData" :key="role.id" v-model="temp.role_id" :value="role.id" :label="role.id">{{ role.name }}</el-radio>
+          <el-radio v-for="album in albumsData" :key="album.id" v-model="temp.album_id" :value="album.id" :label="album.id">{{ album.name }}</el-radio>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -147,6 +155,7 @@ export default {
       genderOptions: [{ label: '不限', key: '-1' }, { label: '男', key: '1' }, { label: '女', key: '0' }],
       temp: {
         id: undefined,
+        num: '',
         name: '',
         author: '',
         descr: '',
@@ -170,6 +179,7 @@ export default {
   created() {
     this.getList()
   },
+
   methods: {
     getAlbums() {
       fetchAlbums().then(response => {
@@ -214,6 +224,7 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
+        num: '',
         name: '',
         descr: '',
         big_url: ''
@@ -248,6 +259,7 @@ export default {
       })
     },
     handleUpdate(row) {
+      this.getAlbums()
       this.temp = Object.assign({}, row) // copy obj
       this.fileList.splice(0, this.fileList.length, {
         name: row.big_url.substring(row.big_url.lastIndexOf('/') + 1),

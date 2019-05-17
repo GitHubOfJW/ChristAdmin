@@ -117,6 +117,8 @@ export default {
     dragTips2: 'The after dragging order',
     title: 'Título',
     album: 'Album',
+    num: 'No',
+    music_count: 'Music Count',
     mobile: 'Mobile',
     gender: 'Gender',
     birth: 'Birth',
