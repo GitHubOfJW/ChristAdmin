@@ -93,6 +93,14 @@
             <el-button size="small" type="primary">点击上传</el-button>
           </el-upload>
         </el-form-item>
+        <el-form-item :label="$t('table.lrc')">
+          <el-input
+            v-model="temp.lrc"
+            :autosize="{ minRows: 4, maxRows: 8}"
+            type="textarea"
+            placeholder="lrc"
+          />
+        </el-form-item>
         <el-form-item :label="$t('table.album')" prop="album_id">
           <el-radio v-for="album in albumsData" :key="album.id" v-model="temp.album_id" :value="album.id" :label="album.id">{{ album.name }}</el-radio>
         </el-form-item>
@@ -279,9 +287,10 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateMusic(tempData).then(() => {
+          updateMusic(tempData).then((data) => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
+                this.temp.lrc = data.data.lrc
                 const index = this.list.indexOf(v)
                 this.list.splice(index, 1, this.temp)
                 break

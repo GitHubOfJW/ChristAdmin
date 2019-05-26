@@ -118,6 +118,7 @@ export default {
     title: '标题',
     album: '专辑',
     num: '序号',
+    lrc: '歌词',
     music_count: '歌曲数量',
     mobile: '手机号',
     gender: '性别',

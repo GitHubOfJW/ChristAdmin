@@ -118,6 +118,7 @@ export default {
     title: 'Título',
     album: 'Album',
     num: 'No',
+    lrc: 'Lrc',
     music_count: 'Music Count',
     mobile: 'Mobile',
     gender: 'Gender',
