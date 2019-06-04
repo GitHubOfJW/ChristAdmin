@@ -21,6 +21,7 @@
     <el-table
       :key="tableKey"
       v-loading="listLoading"
+      :row-class-name="tableRowClassName"
       :data="list"
       border
       fit
@@ -73,8 +74,11 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
           </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+          <el-button v-if="!row.is_delete" size="mini" type="danger" @click="handleDelete(row, 'delete')">
             {{ $t('table.delete') }}
+          </el-button>
+          <el-button v-else size="mini" type="warning" @click="handleDelete(row, 'recover')">
+            {{ $t('table.recover') }}
           </el-button>
         </template>
       </el-table-column>
@@ -121,7 +125,7 @@
 </template>
 
 <script>
-import { fetchList, createMember, updateMember } from '@/api/member'
+import { fetchList, createMember, updateMember, deleteById } from '@/api/member'
 import { fetchRoles } from '@/api/role'
 // eslint-disable-next-line
 import { parseTime } from '@/utils'
@@ -185,6 +189,9 @@ export default {
     this.getRoles()
   },
   methods: {
+    tableRowClassName({ row }) {
+      return row.is_delete ? 'warning-row' : ''
+    },
     getRoles() {
       fetchRoles().then(response => {
         this.rolesData = response.data.items
@@ -204,12 +211,12 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
-    handleModifyStatus(row, status) {
+    handleModifyStatus(row) {
       this.$message({
         message: '操作成功',
         type: 'success'
       })
-      row.status = status
+      row.is_delete = true
     },
     sortChange(data) {
       const { prop, order } = data
@@ -297,16 +304,33 @@ export default {
         }
       })
     },
-    handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
+    handleDelete(row, status) {
+      deleteById(row.id, status).then(response => {
+        if (response.code === 20000) {
+          this.$notify({
+            title: '成功',
+            message: response.message,
+            type: 'success',
+            duration: 2000
+          })
+          // const index = this.list.indexOf(row)
+          // this.list.splice(index, 1)
+          row.is_delete = status === 'delete'
+        } else {
+          this.$notify({
+            title: '失败',
+            message: response.message,
+            type: 'error',
+            duration: 2000
+          })
+        }
       })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
     }
   }
 }
 </script>
+<style>
+  .el-table .warning-row {
+    background: oldlace;
+  }
+</style>

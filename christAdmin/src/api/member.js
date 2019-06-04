@@ -40,9 +40,24 @@ export function updateMember(data) {
   })
 }
 
+export function deleteById(id, status) {
+  if (status === 'delete') {
+    return request({
+      url: '/member/delete/' + id,
+      method: 'delete'
+    })
+  } else {
+    return request({
+      url: '/member/recover/' + id,
+      method: 'put'
+    })
+  }
+}
+
 export function logout() {
   return request({
     url: '/member/logout',
     method: 'delete'
   })
 }
+

@@ -31,3 +31,17 @@ export function updateAlbum(data) {
     data
   })
 }
+
+export function deleteById(id, status) {
+  if (status === 'delete') {
+    return request({
+      url: '/album/delete/' + id,
+      method: 'delete'
+    })
+  } else {
+    return request({
+      url: '/album/recover/' + id,
+      method: 'put'
+    })
+  }
+}

@@ -11,6 +11,7 @@
     <el-table
       :key="tableKey"
       v-loading="listLoading"
+      :row-class-name="tableRowClassName"
       :data="list"
       border
       fit
@@ -43,13 +44,21 @@
           <img :src="scope.row.big_url" height="50">
         </template>
       </el-table-column>
+      <el-table-column align="center" label="Image">
+        <template slot-scope="scope">
+          <img :src="scope.row.thumb_url" height="50">
+        </template>
+      </el-table-column>
       <el-table-column fixed="right" :label="$t('table.actions')" align="center" width="160" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
           </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+          <el-button v-if="!row.is_delete" size="mini" type="danger" @click="handleDelete(row,'delete')">
             {{ $t('table.delete') }}
+          </el-button>
+          <el-button v-else size="mini" type="warning" @click="handleDelete(row,'recover')">
+            {{ $t('table.recover') }}
           </el-button>
         </template>
       </el-table-column>
@@ -76,6 +85,12 @@
             <i class="el-icon-plus" />
           </el-upload>
         </el-form-item>
+        <el-form-item label="Image" prop="thumb_url">
+          <el-input type="hidden" value="temp.thumb_url" />
+          <el-upload ref="upload" :file-list="thumbList" action="/dev-api/upload/image" accept="image/jpg,image/jpeg,image/png" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleThumbRemove" :on-success="handleThumbSuccess" :limit="1">
+            <i class="el-icon-plus" />
+          </el-upload>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -93,7 +108,7 @@
 </template>
 
 <script>
-import { fetchList, createAlbum, updateAlbum } from '@/api/album'
+import { fetchList, createAlbum, updateAlbum, deleteById } from '@/api/album'
 import { fetchRoles } from '@/api/role'
 // eslint-disable-next-line
 import { parseTime } from '@/utils'
@@ -121,6 +136,7 @@ export default {
         children: 'children'
       },
       fileList: [],
+      thumbList: [],
       dialogImageUrl: '',
       dialogVisible: false,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
@@ -150,6 +166,9 @@ export default {
     this.getRoles()
   },
   methods: {
+    tableRowClassName({ row }) {
+      return row.is_delete ? 'warning-row' : ''
+    },
     getRoles() {
       fetchRoles().then(response => {
         this.rolesData = response.data.items
@@ -259,15 +278,27 @@ export default {
         }
       })
     },
-    handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
+    handleDelete(row, status) {
+      deleteById(row.id, status).then(response => {
+        if (response.code === 20000) {
+          this.$notify({
+            title: '成功',
+            message: response.message,
+            type: 'success',
+            duration: 2000
+          })
+          row.is_delete = status === 'delete'
+          // const index = this.list.indexOf(row)
+          // this.list.splice(index, 1)
+        } else {
+          this.$notify({
+            title: '失败',
+            message: response.message,
+            type: 'error',
+            duration: 2000
+          })
+        }
       })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
     },
     handleSuccess(response, file, fileList) {
       this.temp.big_url = response.data.url
@@ -276,7 +307,17 @@ export default {
         url: response.data.url
       })
     },
+    handleThumbSuccess(response, file, fileList) {
+      this.temp.thumb_url = response.data.url
+      this.thumbList.splice(0, this.thumbList.length, {
+        name: response.data.filename,
+        url: response.data.url
+      })
+    },
     handleRemove(file, fileList) {
+      console.log(file, fileList)
+    },
+    handleThumbRemove(file, fileList) {
       console.log(file, fileList)
     },
     handlePictureCardPreview(file) {
@@ -285,7 +326,13 @@ export default {
     },
     handlerClose() {
       this.fileList.splice(0, this.fileList.length)
+      this.thumbList.splice(0, this.thumbList.length)
     }
   }
 }
 </script>
+<style>
+  .el-table .warning-row {
+    background: oldlace;
+  }
+</style>

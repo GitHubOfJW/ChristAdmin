@@ -115,6 +115,7 @@ export default {
     dynamicTips2: 'Not fixed header, sorted by click order',
     dragTips1: 'Orden por defecto',
     dragTips2: 'The after dragging order',
+    recover: 'Recover',
     title: 'Título',
     album: 'Album',
     num: 'No',

@@ -11,6 +11,7 @@
     <el-table
       :key="tableKey"
       v-loading="listLoading"
+      :row-class-name="tableRowClassName"
       :data="list"
       border
       fit
@@ -43,18 +44,21 @@
           {{ scope.row.descr }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Image">
+      <!-- <el-table-column align="center" label="Image">
         <template slot-scope="scope">
           <img :src="scope.row.big_url" height="50">
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column fixed="right" :label="$t('table.actions')" align="center" width="160" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
           </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+          <el-button v-if="!row.is_delete" size="mini" type="danger" @click="handleDelete(row, 'delete')">
             {{ $t('table.delete') }}
+          </el-button>
+          <el-button v-else size="mini" type="warning" @click="handleDelete(row, 'recover')">
+            {{ $t('table.recover') }}
           </el-button>
         </template>
       </el-table-column>
@@ -81,12 +85,12 @@
             placeholder="Description"
           />
         </el-form-item>
-        <el-form-item label="Image" prop="big_url">
+        <!-- <el-form-item label="Image" prop="big_url">
           <el-input type="hidden" value="temp.big_url" />
           <el-upload :file-list="fileList" action="/dev-api/upload/image" accept="image/jpg,image/jpeg,image/png" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-success="handleSuccess" :limit="1">
             <i class="el-icon-plus" />
           </el-upload>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="Source" prop="source_url">
           <el-input type="hidden" value="temp.source_url" />
           <el-upload class="upload-demo" :file-list="sourceList" action="/dev-api/upload/music" accept="audio/mpeg,audio/x-wav" multiple :on-remove="handleRemove" :on-success="handleSourceSuccess" :limit="1">
@@ -121,7 +125,7 @@
 </template>
 
 <script>
-import { fetchList, createMusic, updateMusic } from '@/api/music'
+import { fetchList, createMusic, updateMusic, deleteById } from '@/api/music'
 import { fetchAlbums } from '@/api/album'
 // eslint-disable-next-line
 import { parseTime } from '@/utils'
@@ -189,6 +193,9 @@ export default {
   },
 
   methods: {
+    tableRowClassName({ row }) {
+      return row.is_delete ? 'warning-row' : ''
+    },
     getAlbums() {
       fetchAlbums().then(response => {
         this.albumsData = response.data.items
@@ -307,15 +314,27 @@ export default {
         }
       })
     },
-    handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
+    handleDelete(row, status) {
+      deleteById(row.id, status).then(response => {
+        if (response.code === 20000) {
+          this.$notify({
+            title: '成功',
+            message: response.message,
+            type: 'success',
+            duration: 2000
+          })
+          row.is_delete = status === 'delete'
+          // const index = this.list.indexOf(row)
+          // this.list.splice(index, 1)
+        } else {
+          this.$notify({
+            title: '失败',
+            message: response.message,
+            type: 'error',
+            duration: 2000
+          })
+        }
       })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
     },
     handleSuccess(response, file, fileList) {
       this.temp.big_url = response.data.url
@@ -345,3 +364,8 @@ export default {
   }
 }
 </script>
+<style>
+  .el-table .warning-row {
+    background: oldlace;
+  }
+</style>

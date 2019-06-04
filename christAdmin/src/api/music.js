@@ -23,3 +23,17 @@ export function updateMusic(data) {
     data
   })
 }
+
+export function deleteById(id, status) {
+  if (status === 'delete') {
+    return request({
+      url: '/music/delete/' + id,
+      method: 'delete'
+    })
+  } else {
+    return request({
+      url: '/music/recover/' + id,
+      method: 'put'
+    })
+  }
+}

@@ -115,6 +115,7 @@ export default {
     dynamicTips2: '不固定表头, 按照点击顺序排序',
     dragTips1: '默认顺序',
     dragTips2: '拖拽后顺序',
+    recover: '恢复',
     title: '标题',
     album: '专辑',
     num: '序号',
