@@ -37,9 +37,17 @@ export function updateRole(data) {
   })
 }
 
-export function deleteRole(id) {
-  return request({
-    url: `/role/delete/${id}`,
-    method: 'delete'
-  })
+export function deleteRole(id, status) {
+  if (status === 'delete') {
+    return request({
+      url: `/role/delete/${id}`,
+      method: 'delete'
+    })
+  } else {
+    return request({
+      url: `/role/recover/${id}`,
+      method: 'put'
+    })
+  }
 }
+

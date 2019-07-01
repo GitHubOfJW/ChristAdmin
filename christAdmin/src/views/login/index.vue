@@ -52,7 +52,7 @@
         {{ $t('login.logIn') }}
       </el-button>
 
-      <div style="position:relative">
+      <div style="position:relative;display:none;">
         <div class="tips">
           <span>{{ $t('login.username') }} : admin</span>
           <span>{{ $t('login.password') }} : {{ $t('login.any') }}</span>
@@ -105,8 +105,8 @@ export default {
     }
     return {
       loginForm: {
-        username: '13311255165',
-        password: 'zhujianwei'
+        username: '',
+        password: ''
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],

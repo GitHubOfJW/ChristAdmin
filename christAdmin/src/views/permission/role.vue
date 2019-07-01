@@ -6,7 +6,7 @@
     <el-button style="float:right;" type="primary" @click="getRoles()">
       <i class="el-icon-refresh" /> 刷新
     </el-button>
-    <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
+    <el-table :row-class-name="tableRowClassName" :data="rolesList" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" :label="$t('table.id')" width="220">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
@@ -29,11 +29,14 @@
       </el-table-column>
       <el-table-column align="center" :label="$t('table.actions')">
         <template slot-scope="scope">
-          <el-button type="primary" size="small" @click="handleEdit(scope)">
-            {{ $t('permission.editPermission') }}
+          <el-button v-if="!scope.is_delete" type="primary" size="small" @click="handleEdit(scope)">
+            {{ $t('table.edit') }}
           </el-button>
-          <el-button type="danger" size="small" @click="handleDelete(scope)">
-            {{ $t('permission.delete') }}
+          <el-button v-if="!scope.row.is_delete" type="danger" size="small" @click="handleDelete(scope.row, 'delete')">
+            {{ $t('table.delete') }}
+          </el-button>
+          <el-button v-else type="warning" size="small" @click="handleDelete(scope.row, 'recover')">
+            {{ $t('table.recover') }}
           </el-button>
         </template>
       </el-table-column>
@@ -55,6 +58,9 @@
         <el-form-item label="Menus">
           <el-tree ref="tree" :check-strictly="checkStrictly" :data="routesData" :props="defaultProps" show-checkbox node-key="path" class="permission-tree" />
         </el-form-item>
+        <el-form-item label="Rule">
+          <el-tree ref="ruleTree" :data="ruleData" :props="ruleProps" show-checkbox node-key="id" class="permission-tree" />
+        </el-form-item>
       </el-form>
       <div style="text-align:right;">
         <el-button type="danger" @click="dialogVisible=false">
@@ -71,6 +77,7 @@
 <script>
 import path from 'path'
 import { deepClone } from '@/utils'
+import { fetchCateList } from '@/api/rule'
 import { getRoutes, getRoles, addRole, deleteRole, updateRole } from '@/api/role'
 import i18n from '@/lang'
 
@@ -78,7 +85,8 @@ const defaultRole = {
   key: '',
   name: '',
   descr: '',
-  routes: []
+  routes: [],
+  rules: []
 }
 
 export default {
@@ -86,6 +94,7 @@ export default {
     return {
       role: Object.assign({}, defaultRole),
       routes: [],
+      rules: [],
       rolesList: [],
       dialogVisible: false,
       dialogType: 'new',
@@ -93,20 +102,43 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'title'
+      },
+      ruleProps: {
+        label: 'name',
+        children: 'rules'
       }
     }
   },
   computed: {
     routesData() {
       return this.routes
+    },
+    ruleData() {
+      return this.rules
     }
   },
   created() {
     // Mock: get all routes and roles list from server
     this.getRoutes()
     this.getRoles()
+    this.getCateList()
   },
   methods: {
+    tableRowClassName({ row }) {
+      if (row.is_delete) {
+        return 'warning-row'
+      }
+      return ''
+    },
+    getCateList() {
+      fetchCateList({
+        children: true
+      }).then(response => {
+        if (response.code === 20000) {
+          this.rules = response.data.items
+        }
+      })
+    },
     async getRoutes() {
       const res = await getRoutes()
       this.serviceRoutes = res.data
@@ -173,6 +205,9 @@ export default {
       if (this.$refs.tree) {
         this.$refs.tree.setCheckedNodes([])
       }
+      if (this.$refs.ruleTree) {
+        this.$refs.ruleTree.setCheckedNodes([])
+      }
       this.dialogType = 'new'
       this.dialogVisible = true
     },
@@ -184,25 +219,30 @@ export default {
       this.$nextTick(() => {
         const routes = this.generateRoutes(this.role.routes)
         this.$refs.tree.setCheckedNodes(this.generateArr(routes))
+        this.$refs.ruleTree.setCheckedNodes(this.role.rules)
         // set checked state of a node not affects its father and child nodes
         this.checkStrictly = false
       })
     },
-    handleDelete({ $index, row }) {
-      this.$confirm('Confirm to remove the role?', 'Warning', {
-        confirmButtonText: 'Confirm',
-        cancelButtonText: 'Cancel',
-        type: 'warning'
-      })
-        .then(async() => {
-          await deleteRole(row.role_key)
-          this.rolesList.splice($index, 1)
-          this.$message({
+    handleDelete(row, status) {
+      deleteRole(row.id, status).then(response => {
+        if (response.code === 20000) {
+          this.$notify({
+            title: '成功',
+            message: response.message,
             type: 'success',
-            message: 'Delete succed!'
+            duration: 2000
           })
-        })
-        .catch(err => { console.error(err) })
+          row.is_delete = status === 'delete'
+        } else {
+          this.$notify({
+            title: '失败',
+            message: response.message,
+            type: 'error',
+            duration: 2000
+          })
+        }
+      })
     },
     generateTree(routes, basePath = '/', checkedKeys) {
       const res = []
@@ -225,10 +265,18 @@ export default {
       const isEdit = this.dialogType === 'edit'
 
       const checkedKeys = this.$refs.tree.getCheckedKeys()
+      const ruleCheckedKeys = this.$refs.ruleTree.getCheckedKeys()
       this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
+      this.role.rules = ruleCheckedKeys
 
       if (isEdit) {
         await updateRole(this.role, this.role)
+        this.role.rules = ruleCheckedKeys.map(ruleId => {
+          return {
+            id: ruleId,
+            is_delete: false
+          }
+        })
         for (let index = 0; index < this.rolesList.length; index++) {
           if (this.rolesList[index].role_key === this.role.role_key) {
             this.rolesList.splice(index, 1, Object.assign({}, this.role))
@@ -240,6 +288,12 @@ export default {
         this.role.role_key = data.role_key
         this.role.id = data.id
         this.rolesList.push(this.role)
+        this.role.rules = ruleCheckedKeys.map(ruleId => {
+          return {
+            id: ruleId,
+            is_delete: false
+          }
+        })
       }
 
       const { descr, role_key, name } = this.role
@@ -279,13 +333,21 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .app-container {
   .roles-table {
     margin-top: 30px;
   }
   .permission-tree {
     margin-bottom: 30px;
+  }
+  .el-table {
+    .warning-row {
+      background: oldlace;
+    }
+    .success-row {
+      background: #f0f9eb;
+    }
   }
 }
 </style>

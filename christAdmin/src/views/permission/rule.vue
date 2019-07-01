@@ -57,8 +57,11 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
           </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+          <el-button v-if="!row.is_delete" size="mini" type="danger" @click="handleDelete(row,'delete')">
             {{ $t('table.delete') }}
+          </el-button>
+          <el-button v-else size="mini" type="warning" @click="handleDelete(row,'recover')">
+            {{ $t('table.recover') }}
           </el-button>
         </template>
       </el-table-column>
@@ -96,7 +99,7 @@
 </template>
 
 <script>
-import { fetchList, fetchCateList, createRule, updateRule } from '@/api/rule'
+import { fetchList, fetchCateList, createRule, updateRule, deleteById } from '@/api/rule'
 // eslint-disable-next-line
 import { parseTime } from '@/utils'
 import waves from '@/directive/waves' // waves directive
@@ -285,19 +288,34 @@ export default {
         }
       })
     },
-    handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
+    handleDelete(row, status) {
+      deleteById(row.id, status).then(response => {
+        if (response.code === 20000) {
+          this.$notify({
+            title: '成功',
+            message: response.message,
+            type: 'success',
+            duration: 2000
+          })
+          row.is_delete = status === 'delete'
+          // const index = this.list.indexOf(row)
+          // this.list.splice(index, 1)
+        } else {
+          this.$notify({
+            title: '失败',
+            message: response.message,
+            type: 'error',
+            duration: 2000
+          })
+        }
       })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
     },
     tableRowClassName({ row }, rowIndex) {
       if (row.parent_id === 0) {
         return 'success-row'
+      }
+      if (row.is_delete) {
+        return 'warning-row'
       }
       return ''
     }

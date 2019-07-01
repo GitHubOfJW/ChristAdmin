@@ -56,7 +56,7 @@ const actions = {
         const { role, name, avatar, descr } = data
         commit('SET_ROLES', [role.role_key])
         commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
+        commit('SET_AVATAR', avatar || 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif')
         commit('SET_INTRODUCTION', descr)
         resolve(data)
       }).catch(error => {

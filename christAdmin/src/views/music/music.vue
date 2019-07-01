@@ -87,13 +87,13 @@
         </el-form-item>
         <!-- <el-form-item label="Image" prop="big_url">
           <el-input type="hidden" value="temp.big_url" />
-          <el-upload :file-list="fileList" action="/dev-api/upload/image" accept="image/jpg,image/jpeg,image/png" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-success="handleSuccess" :limit="1">
+          <el-upload :file-list="fileList" action="/api/upload/image" accept="image/jpg,image/jpeg,image/png" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-success="handleSuccess" :limit="1">
             <i class="el-icon-plus" />
           </el-upload>
         </el-form-item> -->
         <el-form-item label="Source" prop="source_url">
           <el-input type="hidden" value="temp.source_url" />
-          <el-upload class="upload-demo" :file-list="sourceList" action="/dev-api/upload/music" accept="audio/mpeg,audio/x-wav" multiple :on-remove="handleRemove" :on-success="handleSourceSuccess" :limit="1">
+          <el-upload class="upload-demo" :file-list="sourceList" action="/api/upload/music" accept="audio/mpeg,audio/x-wav" multiple :on-remove="handleRemove" :on-success="handleSourceSuccess" :limit="1">
             <el-button size="small" type="primary">点击上传</el-button>
           </el-upload>
         </el-form-item>
@@ -276,14 +276,18 @@ export default {
     handleUpdate(row) {
       this.getAlbums()
       this.temp = Object.assign({}, row) // copy obj
-      this.fileList.splice(0, this.fileList.length, {
-        name: row.big_url.substring(row.big_url.lastIndexOf('/') + 1),
-        url: row.big_url
-      })
-      this.sourceList.splice(0, this.sourceList.length, {
-        name: row.source_url.substring(row.source_url.lastIndexOf('/') + 1),
-        url: row.source_url
-      })
+      if (row.big_url) {
+        this.fileList.splice(0, this.fileList.length, {
+          name: row.big_url.substring(row.big_url.lastIndexOf('/') + 1),
+          url: row.big_url
+        })
+      }
+      if (row.source_url) {
+        this.sourceList.splice(0, this.sourceList.length, {
+          name: row.source_url.substring(row.source_url.lastIndexOf('/') + 1),
+          url: row.source_url
+        })
+      }
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

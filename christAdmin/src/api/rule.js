@@ -31,3 +31,17 @@ export function updateRule(data) {
     data
   })
 }
+
+export function deleteById(id, status) {
+  if (status === 'delete') {
+    return request({
+      url: '/rule/delete/' + id,
+      method: 'delete'
+    })
+  } else {
+    return request({
+      url: '/rule/recover/' + id,
+      method: 'put'
+    })
+  }
+}

@@ -39,12 +39,12 @@
           {{ scope.row.music_count }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Image">
+      <el-table-column align="center" label="Banner">
         <template slot-scope="scope">
           <img :src="scope.row.big_url" height="50">
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Image">
+      <el-table-column align="center" label="Thumb">
         <template slot-scope="scope">
           <img :src="scope.row.thumb_url" height="50">
         </template>
@@ -79,15 +79,15 @@
             placeholder="Ablum Description"
           />
         </el-form-item>
-        <el-form-item label="Image" prop="big_url">
+        <el-form-item label="Banner" prop="big_url">
           <el-input type="hidden" value="temp.big_url" />
-          <el-upload ref="upload" :file-list="fileList" action="/dev-api/upload/image" accept="image/jpg,image/jpeg,image/png" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-success="handleSuccess" :limit="1">
+          <el-upload ref="upload" :file-list="fileList" action="/api/upload/image" accept="image/jpg,image/jpeg,image/png" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-success="handleSuccess" :limit="1">
             <i class="el-icon-plus" />
           </el-upload>
         </el-form-item>
-        <el-form-item label="Image" prop="thumb_url">
+        <el-form-item label="Thumb" prop="thumb_url">
           <el-input type="hidden" value="temp.thumb_url" />
-          <el-upload ref="upload" :file-list="thumbList" action="/dev-api/upload/image" accept="image/jpg,image/jpeg,image/png" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleThumbRemove" :on-success="handleThumbSuccess" :limit="1">
+          <el-upload ref="upload" :file-list="thumbList" action="/api/upload/image" accept="image/jpg,image/jpeg,image/png" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleThumbRemove" :on-success="handleThumbSuccess" :limit="1">
             <i class="el-icon-plus" />
           </el-upload>
         </el-form-item>
@@ -248,6 +248,10 @@ export default {
       this.fileList.splice(0, this.fileList.length, {
         name: row.big_url.substring(row.big_url.lastIndexOf('/') + 1),
         url: row.big_url
+      })
+      this.thumbList.splice(0, this.thumbList.length, {
+        name: row.thumb_url.substring(row.thumb_url.lastIndexOf('/') + 1),
+        url: row.thumb_url
       })
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
