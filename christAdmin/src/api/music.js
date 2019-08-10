@@ -24,6 +24,14 @@ export function updateMusic(data) {
   })
 }
 
+export function saleUpdate(data) {
+  return request({
+    url: `/music/changeSale/${data.id}`,
+    method: 'put',
+    data
+  })
+}
+
 export function deleteById(id, status) {
   if (status === 'delete') {
     return request({

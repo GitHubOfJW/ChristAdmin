@@ -1,12 +1,18 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
+      <el-select v-model="listQuery.album_id" :placeholder="$t('table.cate')" class="filter-item" style="width: 150px">
+        <el-option v-for="item in filterAlbums" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
+      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
+        {{ $t('table.search') }}
+      </el-button>
+      <el-button class="filter-item" style="float:right;" type="primary" icon="el-icon-edit" @click="handleCreate">
         {{ $t('table.add') }}
       </el-button>
-      <el-button style="float:right;" type="primary" @click="getList()">
+      <!-- <el-button style="float:right;" type="primary" @click="getList()">
         <i class="el-icon-refresh" /> 刷新
-      </el-button>
+      </el-button> -->
     </div>
     <el-table
       :key="tableKey"
@@ -34,9 +40,19 @@
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.author')" width="300px" align="center">
+      <el-table-column :label="$t('table.author')" width="80px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.author }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.lrc')" width="80px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.has_lrc ? '有歌词':'无歌词' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.lrc')" width="80px" align="center">
+        <template slot-scope="scope">
+          <span>{{ !scope.row.has_lrc && !scope.row.lrc_edit ? '待编辑':'已完成' }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" :label="$t('table.desc')">
@@ -49,7 +65,7 @@
           <img :src="scope.row.big_url" height="50">
         </template>
       </el-table-column> -->
-      <el-table-column fixed="right" :label="$t('table.actions')" align="center" width="160" class-name="small-padding fixed-width">
+      <el-table-column fixed="right" :label="$t('table.actions')" align="center" width="250" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
@@ -59,6 +75,12 @@
           </el-button>
           <el-button v-else size="mini" type="warning" @click="handleDelete(row, 'recover')">
             {{ $t('table.recover') }}
+          </el-button>
+          <el-button v-if="!row.is_sale" type="primary" size="mini" @click="saleUpdate(row)">
+            {{ $t('table.sale') }}
+          </el-button>
+          <el-button v-else size="mini" type="warning" @click="saleUpdate(row)">
+            {{ $t('table.unsale') }}
           </el-button>
         </template>
       </el-table-column>
@@ -125,7 +147,7 @@
 </template>
 
 <script>
-import { fetchList, createMusic, updateMusic, deleteById } from '@/api/music'
+import { fetchList, createMusic, updateMusic, deleteById, saleUpdate } from '@/api/music'
 import { fetchAlbums } from '@/api/album'
 // eslint-disable-next-line
 import { parseTime } from '@/utils'
@@ -145,12 +167,7 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        mobile: undefined,
-        name: undefined,
-        wechat: undefined,
-        qq: undefined,
-        sort: '+id',
-        gender: '-1'
+        album_id: 0
       },
       checkStrictly: false,
       rolesData: [],
@@ -161,6 +178,10 @@ export default {
       fileList: [],
       sourceList: [],
       albumsData: [],
+      filterAlbums: [{
+        id: 0,
+        name: '全部专辑'
+      }],
       dialogImageUrl: '',
       dialogVisible: false,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
@@ -190,6 +211,7 @@ export default {
   },
   created() {
     this.getList()
+    this.getAlbums()
   },
 
   methods: {
@@ -199,6 +221,7 @@ export default {
     getAlbums() {
       fetchAlbums().then(response => {
         this.albumsData = response.data.items
+        this.filterAlbums.splice(1, this.filterAlbums.length - 1, ...this.albumsData)
       })
     },
     getList() {
@@ -246,6 +269,12 @@ export default {
       }
       this.fileList.splice(0, this.fileList.length)
       this.sourceList.splice(0, this.sourceList.length)
+    },
+    saleUpdate(row) {
+      saleUpdate(row).then(data => {
+        row.is_sale = data.data.is_sale
+        this.$forceUpdate()
+      })
     },
     handleCreate() {
       this.resetTemp()
@@ -301,9 +330,8 @@ export default {
           updateMusic(tempData).then((data) => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
-                this.temp.lrc = data.data.lrc
                 const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
+                this.list.splice(index, 1, data.data)
                 break
               }
             }

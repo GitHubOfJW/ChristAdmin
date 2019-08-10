@@ -120,6 +120,8 @@ export default {
     album: 'Album',
     num: 'No',
     lrc: 'Lrc',
+    sale: 'sale',
+    unsale: 'unsale',
     music_count: 'Music Count',
     mobile: 'Mobile',
     gender: 'Gender',

@@ -120,6 +120,8 @@ export default {
     album: '专辑',
     num: '序号',
     lrc: '歌词',
+    sale: '上架',
+    unsale: '下架',
     music_count: '歌曲数量',
     mobile: '手机号',
     gender: '性别',
