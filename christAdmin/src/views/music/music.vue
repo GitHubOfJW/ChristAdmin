@@ -52,7 +52,7 @@
       </el-table-column>
       <el-table-column :label="$t('table.lrc')" width="80px" align="center">
         <template slot-scope="scope">
-          <span>{{ !scope.row.has_lrc && !scope.row.lrc_edit ? '待编辑':'已完成' }}</span>
+          <span>{{ scope.row.has_lrc ? (scope.row.lrc_edit ? '待编辑':'已完成'):'待添加' }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" :label="$t('table.desc')">
